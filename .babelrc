@@ -1,0 +1,15 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "chrome": "73",
+
+          "esmodules": true
+        }
+      }
+    ]
+  ],
+  "plugins": ["transform-class-properties"]
+}
