@@ -12,6 +12,8 @@ function PriorityQueue() {
         return;
       }
       let arrayCopy = array.splice(0, nextIndex);
+      if (arrayCopy.length) {
+      }
       arrayCopy.push({ priority, data }, ...array);
       array = arrayCopy;
     },
@@ -24,6 +26,17 @@ function PriorityQueue() {
 
     toArray: () => {
       return array;
+    },
+    *[Symbol.iterator]() {
+      for (let index in array) {
+        yield array[index];
+      }
+    },
+    get length() {
+      return array.length;
+    },
+    shift: () => {
+      return array.shift();
     }
   };
 }
