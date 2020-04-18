@@ -1,12 +1,47 @@
-import PriorityQueue from "./PriorityQueue";
-import Haffman from "./Haffman";
+import PriorityQueue from './PriorityQueue';
+import HaffmanCompression from './HaffmanCompression';
 
-(() => {
-  // let que = new PriorityQueue();
-  // que.addItem({ priority: 2, data: 10 });
-  // que.addItem({ priority: 3, data: 30 });
-  // que.addItem({ priority: 1, data: 40 });
-  // console.log(que.toArray());
-  let haf = new Haffman();
-  console.log(haf.compress("Наша маша".split("")));
+(async () => {
+  let haffmanCompresion = new HaffmanCompression();
+  let message = await (await fetch('message.txt')).text();
+  let result = haffmanCompresion.compress(message.split(''));
+  console.log(
+    ((unicodeText(message).slice('').length -
+      haffmanText(result.compressedMessage, result.alphabet).slice('').length) /
+      unicodeText(message).slice('').length) *
+      100
+  );
+  saveAsFile(haffmanText(result.compressedMessage, result.alphabet), 'encoded');
 })();
+
+function haffmanText(message, alphabet) {
+  let stringifiedAlphabet = Object.entries(alphabet)
+    .map(([char, code]) => {
+      return char.charCodeAt(0).toString(2) + code.join('');
+    })
+    .join('');
+  return stringifiedAlphabet + message.flat().join('');
+}
+
+function unicodeText(message) {
+  return message
+    .split('')
+    .map(char => {
+      return char.charCodeAt(0).toString(2);
+    })
+    .join('');
+}
+
+function saveAsFile(content, filename) {
+  const blob = new Blob([content], { type: 'text/text' });
+  const anchor = document.createElement('a');
+
+  anchor.download = filename + '.txt';
+  anchor.href = (window.webkitURL || window.URL).createObjectURL(blob);
+  anchor.dataset.downloadurl = [
+    'text/plain',
+    anchor.download,
+    anchor.href
+  ].join(':');
+  anchor.click();
+}

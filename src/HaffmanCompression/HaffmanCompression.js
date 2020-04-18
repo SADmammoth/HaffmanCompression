@@ -1,4 +1,4 @@
-import PriorityQueue from "../PriorityQueue";
+import PriorityQueue from '../PriorityQueue';
 
 let compare = (left, right) => {
   if (left === right) {
@@ -17,10 +17,6 @@ function setCompareFunction(predicate) {
 }
 
 function createPriorityQueue(message) {
-  //   if (!alphabet.length) {
-  //     alphabet = removeDuplicates(message);
-  //   }
-
   let counts = {};
   message.forEach(char => {
     if (!counts[char]) {
@@ -90,36 +86,45 @@ function breadthFirstTreeTraversal(tree, showElement, onEnd) {
   return result;
 }
 
-// function removeDuplicates(array) {
-//   return array.filter((element, index) => {
-//     return (
-//       array.slice(index + 1).findIndex(candidate => {
-//         return !compare(candidate, element);
-//       }) < 0
-//     );
-//   });
-// }
+function compression(message, alphabet) {
+  const compressedMessage = [...message];
+  Object.entries(alphabet).forEach(([char, code]) => {
+    let index;
+    while (true) {
+      index = compressedMessage.findIndex(candidate => {
+        return !compare(candidate, char);
+      });
+      if (index < 0) {
+        break;
+      }
+      compressedMessage.splice(index, 1, code);
+    }
+  });
+  return compressedMessage;
+}
 
-export default function Haffman(compareChars) {
+export default function HaffmanCompression(compareChars) {
   if (compareChars) setCompareFunction(compareChars);
-  let currentSequence = [];
+
   let sequences = {};
   return {
     compress: message => {
-      console.log(createPriorityQueue(message).toArray());
       breadthFirstTreeTraversal(
         createTree(createPriorityQueue(message)),
         current => {
           console.log(
             current.priority,
-            typeof current.data === "object" ? "" : current.data
+            typeof current.data === 'object' ? '' : current.data
           );
         },
         (sequence, current) => {
           sequences[current.data] = sequence.map(el => el.value);
         }
       );
-      return sequences;
+      return {
+        alphabet: sequences,
+        compressedMessage: compression(message, sequences)
+      };
     }
   };
 }
