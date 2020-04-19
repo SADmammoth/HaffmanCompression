@@ -1,4 +1,5 @@
 import PriorityQueue from '../PriorityQueue';
+import HaffmanTreeDiagram from '../HaffmanTreeDiagram/HaffmanTreeDiagram';
 
 let compare = (left, right) => {
   if (left === right) {
@@ -34,19 +35,20 @@ function createPriorityQueue(message) {
   return priorityQueue;
 }
 
-function createTree({ ...priorityQueue }) {
-  if (!priorityQueue.length) {
-    return priorityQueue;
+function createTree(priorityQueue) {
+  let tree = { ...priorityQueue };
+  if (!tree.length) {
+    return tree;
   }
 
   let left;
   let right;
-  for (let i = 0; i < priorityQueue.length; i++) {
-    left = { ...[...priorityQueue][0] };
-    right = { ...[...priorityQueue][1] };
+  for (let i = 0; i < tree.length; i++) {
+    left = { ...[...tree][0] };
+    right = { ...[...tree][1] };
 
-    priorityQueue.shift();
-    priorityQueue.shift();
+    tree.shift();
+    tree.shift();
     let newItem = {
       priority: left.priority + right.priority,
       data: {
@@ -54,16 +56,16 @@ function createTree({ ...priorityQueue }) {
         right
       }
     };
-    priorityQueue.addItem(newItem);
+    tree.addItem(newItem);
   }
-  return priorityQueue.toArray()[0];
+  return tree.toArray()[0].data.left;
 }
 
-function breadthFirstTreeTraversal(tree, showElement, onEnd) {
+function depthFirstTreeTraversal(tree, showElement, onLeaf) {
   let root = { ...tree };
   let current = root;
   let result = [];
-  let processStack = [];
+  let processStack = [root];
   do {
     if (current.data.left && result.indexOf(current.data.left) < 0) {
       processStack.push({ value: 0, current });
@@ -77,12 +79,64 @@ function breadthFirstTreeTraversal(tree, showElement, onEnd) {
     }
 
     result.push(current);
-    showElement(current);
+    showElement && showElement(current);
     if (!current.data.left && !current.data.right) {
-      onEnd(processStack.slice(1), current);
+      onLeaf(processStack.slice(1), current);
     }
     current = processStack.pop().current;
   } while (processStack.length);
+  return result;
+}
+
+function breadthFirstTreeTraversal(tree, showElement, onNewLevel) {
+  let root = { ...tree };
+  let current = root;
+  let result = [[]];
+  let processStack = [root];
+  let i = 0;
+  while (processStack.length && i < 100) {
+    result[i] = [];
+    processStack = processStack
+      .map(element => {
+        showElement && showElement(element);
+        result[i].push(element);
+        let arr = [];
+        if (element.data.left) {
+          arr.push(element.data.left);
+        }
+        if (element.data.right) {
+          arr.push(element.data.right);
+        }
+        return arr;
+      })
+      .flat();
+
+    i++;
+    // if (!current.data.left && !current.data.right && !processStack.length) {
+    //   break;
+    //   onLeaf(processStack.slice(1), current);
+    // }
+
+    // showElement(current);
+    // if (
+    //   current.data.left &&
+    //   (!processStack.length || processStack.length === 1)
+    // ) {
+    //   processStack.push(current.data.left);
+    // }
+    // if (
+    //   current.data.right &&
+    //   (!processStack.length || processStack.length === 1)
+    // ) {
+    //   processStack.push(current.data.right);
+    // }
+    // current = processStack.pop();
+
+    // if (!current.data.left && !current.data.right && !processStack.length) {
+    //   break;
+    //   //   onLeaf(processStack.slice(1), current);
+    // }
+  }
   return result;
 }
 
@@ -107,19 +161,31 @@ export default function HaffmanCompression(compareChars) {
   if (compareChars) setCompareFunction(compareChars);
 
   let sequences = {};
+
   return {
     compress: message => {
-      breadthFirstTreeTraversal(
-        createTree(createPriorityQueue(message)),
+      let tree = createTree(createPriorityQueue(message));
+      // console.log(tree);
+      let diag = new HaffmanTreeDiagram();
+      // console.log(diag);
+      depthFirstTreeTraversal(
+        tree,
         current => {
-          console.log(
-            current.priority,
-            typeof current.data === 'object' ? '' : current.data
-          );
+          // diag.addVertex(current.priority);
+          // console.log(
+          //   current.priority,
+          //   typeof current.data === 'object' ? '' : current.data
+          // );
         },
         (sequence, current) => {
           sequences[current.data] = sequence.map(el => el.value);
         }
+      );
+
+      diag.drawTree(
+        tree,
+        Object.keys(sequences).length,
+        breadthFirstTreeTraversal(tree).length
       );
       return {
         alphabet: sequences,

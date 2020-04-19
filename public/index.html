@@ -4,6 +4,37 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Haffman</title>
+    <style>
+      .node circle {
+        stroke: steelblue;
+        stroke-width: 3px;
+      }
+
+      .node text {
+        font: 12px sans-serif;
+      }
+
+      .linkLabel {
+        fill: #ffffff;
+        stroke: #6aa1ce;
+        stroke-width: 1px;
+        font-size: 15px;
+      }
+      .linkText {
+        text-anchor: middle;
+        fill: steelblue;
+        font: 12px sans-serif;
+      }
+
+      .link {
+        fill: none;
+        stroke: #ccc;
+        stroke-width: 2px;
+      }
+    </style>
   </head>
-  <body></body>
+  <body>
+    <div id="tree"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+  </body>
 </html>

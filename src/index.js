@@ -3,8 +3,10 @@ import HaffmanCompression from './HaffmanCompression';
 
 (async () => {
   let haffmanCompresion = new HaffmanCompression();
-  let message = await (await fetch('message.txt')).text();
+  let message = await (await fetch('input.txt')).text();
+  console.time();
   let result = haffmanCompresion.compress(message.split(''));
+  console.timeLog();
   console.log(
     ((unicodeText(message).slice('').length -
       haffmanText(result.compressedMessage, result.alphabet).slice('').length) /
