@@ -12,13 +12,6 @@ let line = d3.svg
   });
 
 function update(source, alphabetLength, levelsCount) {
-  const dataNodes = treeData[0].children.reduce(
-    (totalNodes, nodeInChildren) => {
-      return totalNodes + nodeInChildren.children.length;
-    },
-    0
-  );
-
   const canvasWidth = alphabetLength * 25 + 500;
   const canvasHeight = levelsCount * 20 + 500;
   //Set new height ratio on new renders
@@ -26,47 +19,58 @@ function update(source, alphabetLength, levelsCount) {
   let tree = d3.layout.tree().size([canvasWidth, canvasHeight]);
 
   let svg = d3
-    .select('body')
-    .append('svg')
-    .attr('width', canvasWidth + 250)
-    .attr('height', canvasHeight)
-    .append('g')
-    .attr('transform', 'translate(' + 20 + ',' + 40 + ')');
+    .select("body")
+    .append("svg")
+    .attr("width", canvasWidth + 250)
+    .attr("height", canvasHeight + 1000)
+    .append("g")
+    .attr("transform", "translate(" + 20 + "," + 40 + ")");
   let nodes = tree.nodes(source).reverse(),
     links = tree.links(nodes);
 
   nodes.forEach(function(d) {
-    d.y = d.depth * 50;
-    d.x = d.x * 1.1;
+    if (d !== "null") {
+      d.y = d.depth * 50;
+      d.x = d.x * 1.1;
+    }
   });
 
-  let node = svg.selectAll('g.node').data(nodes, function(d) {
-    return d.id || (d.id = ++i);
+  let node = svg.selectAll("g.node").data(nodes, function(d) {
+    if (d !== "null") {
+      return d.id || (d.id = ++i);
+    }
   });
 
   let nodeEnter = node
     .enter()
-    .append('g')
-    .attr('class', 'node')
-    .attr('transform', function(d) {
-      return 'translate(' + d.x + ',' + d.y + ')';
+    .append("g")
+    .attr("class", function(d) {
+      if (d === "null") {
+        return "hidden";
+      }
+      return "node";
+    })
+    .attr("transform", function(d) {
+      if (d !== "null") {
+        return "translate(" + d.x + "," + d.y + ")";
+      }
     });
 
   nodeEnter
-    .append('circle')
-    .attr('r', 20)
-    .style('fill', '#fff');
+    .append("circle")
+    .attr("r", 20)
+    .style("fill", "#fff");
 
   nodeEnter
-    .append('text')
-    .attr('dy', '.35em')
-    .attr('text-anchor', 'middle')
+    .append("text")
+    .attr("dy", ".35em")
+    .attr("text-anchor", "middle")
     .text(function(d) {
       return d.label;
     })
-    .style('fill-opacity', 1);
+    .style("fill-opacity", 1);
 
-  let link = svg.selectAll('path.link').data(links, function(d) {
+  let link = svg.selectAll("path.link").data(links, function(d) {
     return d.target.id;
   });
 
@@ -80,34 +84,43 @@ function update(source, alphabetLength, levelsCount) {
 
   link
     .enter()
-    .insert('path', 'g')
-    .attr('class', 'link')
-    .attr('d', lineData)
-    .attr('shape-rendering', 'auto');
+    .insert("path", "g")
+    .attr("class", "link")
+    .attr("d", lineData)
+    .attr("shape-rendering", "auto");
   link.exit().remove();
-  let linkLabelContainer = svg.selectAll('.linkLabel').data(links);
-  let linkCont = linkLabelContainer.enter().append('g');
+  let linkLabelContainer = svg.selectAll(".linkLabel").data(links);
+  let linkCont = linkLabelContainer
+    .enter()
+    .append("g")
+    .attr("class", function(d) {
+      if (!d.target.children || !d.target.children.length) {
+        return "hidden";
+      }
+    });
   linkCont
-    .append('circle')
-    .attr('r', 10)
-    .attr('class', 'linkLabel');
+    .append("circle")
+    .attr("r", 10)
+    .attr("class", "linkLabel");
   linkCont
-    .append('text')
-    .attr('class', 'linkText')
-    .attr('dy', 5)
+    .append("text")
+    .attr("class", "linkText")
+    .attr("dy", 5)
     .text(function(d) {
       if (d.source.children[0].id === d.target.id) {
-        return '0';
+        return "0";
       }
-      return '1';
+      return "1";
     });
   linkLabelContainer.exit().remove();
-  linkLabelContainer.attr('transform', function(d) {
-    return (
-      'translate(' +
-      [(d.source.x + d.target.x) / 2, (d.source.y + d.target.y) / 2] +
-      ')'
-    );
+  linkLabelContainer.attr("transform", function(d) {
+    if (d !== "null") {
+      return (
+        "translate(" +
+        [(d.source.x + d.target.x) / 2, (d.source.y + d.target.y) / 2] +
+        ")"
+      );
+    }
   });
 }
 
@@ -129,26 +142,29 @@ export default function HaffmanTreeDiagram() {
         currentNodes = currentNodes
           .map((el, i) => {
             if (!processStack[i] || !processStack[i].filter(el => el).length) {
-              return [null, null];
+              return ["null", "null"];
             }
             if (el) {
               el.children = processStack[i].map(el => {
-                if (!el.data.left && !el.data.right) {
+                if (el) {
+                  if (!el.data.left && !el.data.right) {
+                    return {
+                      label: el.priority,
+                      children: [{ label: '"' + el.data + '"' }]
+                    };
+                  }
                   return {
-                    label: el.priority,
-                    children: [{ label: '"' + el.data + '"' }]
+                    label: el.priority
                   };
                 }
-                return {
-                  label: el.priority
-                };
+                return "null";
               });
               return el.children;
             }
-            return [null, null];
+            return ["null", "null"];
           })
           .flat();
-        if (!currentNodes.filter(el => el !== null).length) {
+        if (!currentNodes.filter(el => el !== "null").length) {
           break;
         }
         processStack = processStack.flat();

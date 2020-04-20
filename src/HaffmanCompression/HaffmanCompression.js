@@ -1,5 +1,5 @@
-import PriorityQueue from '../PriorityQueue';
-import HaffmanTreeDiagram from '../HaffmanTreeDiagram/HaffmanTreeDiagram';
+import PriorityQueue from "../PriorityQueue";
+import HaffmanTreeDiagram from "../HaffmanTreeDiagram/HaffmanTreeDiagram";
 
 let compare = (left, right) => {
   if (left === right) {
@@ -157,10 +157,54 @@ function compression(message, alphabet) {
   return compressedMessage;
 }
 
+function createPath(root, leafValue, path) {
+  let curr = root;
+  for (let i = 0; i < path.length; i++) {
+    if (path[i] === "0") {
+      if (curr.data && curr.data.left) {
+        curr = curr.data.left;
+      } else {
+        curr.data.left = { priority: "", data: {} };
+        curr = curr.data.left;
+      }
+    }
+    if (path[i] === "1") {
+      if (curr.data && curr.data.right) {
+        curr = curr.data.right;
+      } else {
+        curr.data.right = { priority: "", data: {} };
+        curr = curr.data.right;
+      }
+    }
+    if (i === path.length - 1) {
+      curr.data = leafValue;
+    }
+  }
+  return root;
+}
+
+function followPath(start, path) {
+  let curr = start;
+  for (let i = 0; i < path.length; i++) {
+    if (typeof curr.data === "string") {
+      break;
+    }
+    if (path[i] === "0") {
+      curr = curr.data.left;
+    }
+
+    if (path[i] === "1") {
+      curr = curr.data.right;
+    }
+  }
+  return curr;
+}
+
 export default function HaffmanCompression(compareChars) {
   if (compareChars) setCompareFunction(compareChars);
 
   let sequences = {};
+  let tree = {};
 
   return {
     compress: message => {
@@ -168,6 +212,7 @@ export default function HaffmanCompression(compareChars) {
       // console.log(tree);
       let diag = new HaffmanTreeDiagram();
       // console.log(diag);
+
       depthFirstTreeTraversal(
         tree,
         current => {
@@ -181,7 +226,7 @@ export default function HaffmanCompression(compareChars) {
           sequences[current.data] = sequence.map(el => el.value);
         }
       );
-
+      console.log(tree);
       diag.drawTree(
         tree,
         Object.keys(sequences).length,
@@ -191,6 +236,21 @@ export default function HaffmanCompression(compareChars) {
         alphabet: sequences,
         compressedMessage: compression(message, sequences)
       };
-    }
+    },
+    emptyTree: () => {
+      tree = { priority: "", data: {} };
+    },
+    addToTree: (char, path) => {
+      createPath(tree, char, path);
+    },
+    drawTree: alphabet => {
+      let diag = new HaffmanTreeDiagram();
+      diag.drawTree(
+        tree,
+        Object.keys(alphabet).length,
+        breadthFirstTreeTraversal(tree).length
+      );
+    },
+    followPath: (path, start = tree) => followPath(start, path)
   };
 }
