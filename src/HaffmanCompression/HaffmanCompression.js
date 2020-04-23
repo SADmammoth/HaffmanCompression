@@ -43,10 +43,9 @@ function createTree(priorityQueue) {
 
   let left;
   let right;
-  for (let i = 0; i < tree.length; i++) {
-    left = { ...[...tree][0] };
-    right = { ...[...tree][1] };
-
+  for (let i = 0; [...tree].length; i++) {
+    left = { ...tree.toArray()[0] };
+    right = { ...tree.toArray()[1] };
     tree.shift();
     tree.shift();
     let newItem = {
@@ -58,7 +57,7 @@ function createTree(priorityQueue) {
     };
     tree.addItem(newItem);
   }
-  return tree.toArray()[0].data.left;
+  return tree.toArray()[0];
 }
 
 function depthFirstTreeTraversal(tree, showElement, onLeaf) {
@@ -141,20 +140,12 @@ function breadthFirstTreeTraversal(tree, showElement, onNewLevel) {
 }
 
 function compression(message, alphabet) {
-  const compressedMessage = [...message];
-  Object.entries(alphabet).forEach(([char, code]) => {
-    let index;
-    while (true) {
-      index = compressedMessage.findIndex(candidate => {
-        return !compare(candidate, char);
-      });
-      if (index < 0) {
-        break;
-      }
-      compressedMessage.splice(index, 1, code);
-    }
+  return message.map(char => {
+    let u = [...alphabet.keys()].find(candidate => {
+      return !compare(candidate, char);
+    });
+    return alphabet.get(u);
   });
-  return compressedMessage;
 }
 
 function createPath(root, leafValue, path) {
@@ -203,7 +194,7 @@ function followPath(start, path) {
 export default function HaffmanCompression(compareChars) {
   if (compareChars) setCompareFunction(compareChars);
 
-  let sequences = {};
+  let sequences = new Map();
   let tree = {};
 
   return {
@@ -216,21 +207,21 @@ export default function HaffmanCompression(compareChars) {
       depthFirstTreeTraversal(
         tree,
         current => {
-          // diag.addVertex(current.priority);
-          // console.log(
-          //   current.priority,
-          //   typeof current.data === 'object' ? '' : current.data
-          // );
+          console.log(current.priority);
         },
         (sequence, current) => {
-          sequences[current.data] = sequence.map(el => el.value);
+          sequences.set(
+            current.data,
+            sequence.map(el => el.value)
+          );
         }
       );
       console.log(tree);
       diag.drawTree(
         tree,
-        Object.keys(sequences).length,
-        breadthFirstTreeTraversal(tree).length
+        [...sequences.keys()].length,
+        breadthFirstTreeTraversal(tree).length,
+        "tree1"
       );
       return {
         alphabet: sequences,
@@ -248,7 +239,8 @@ export default function HaffmanCompression(compareChars) {
       diag.drawTree(
         tree,
         Object.keys(alphabet).length,
-        breadthFirstTreeTraversal(tree).length
+        breadthFirstTreeTraversal(tree).length,
+        "tree2"
       );
     },
     followPath: (path, start = tree) => followPath(start, path)

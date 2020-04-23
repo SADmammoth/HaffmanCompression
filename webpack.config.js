@@ -16,11 +16,6 @@ module.exports = {
         test: /\.bundle\.js$/,
         use: "bundle-loader"
       },
-      // { enforce: 'pre', test: /\.(js|ts)$/, loader: 'eslint-loader' },
-      {
-        test: /.(ts)$/,
-        use: ["ts-loader"]
-      },
       {
         test: /\.(js)$/,
         exclude: /(node_modules)/,

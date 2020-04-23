@@ -1,42 +1,40 @@
+import List from "../List";
+
 function PriorityQueue() {
-  let array = [];
+  let list = new List();
 
   return {
     addItem: ({ priority, data }) => {
-      let nextIndex = array.findIndex(el => {
+      let nextIndex = list.findIndex(el => {
         return el.priority > priority;
       });
 
       if (nextIndex < 0) {
-        array.push({ priority, data });
+        list.addItem({ priority, data });
         return;
       }
-      let arrayCopy = array.splice(0, nextIndex);
-      if (arrayCopy.length) {
-      }
-      arrayCopy.push({ priority, data }, ...array);
-      array = arrayCopy;
+      list.insertWithIndex(nextIndex, { priority, data });
     },
 
     getItemsByPriority: priority => {
-      return array.filter(el => {
+      return list.filter(el => {
         return el.priority === priority;
       });
     },
 
     toArray: () => {
-      return array;
+      return list.toArray();
     },
     *[Symbol.iterator]() {
-      for (let index in array) {
-        yield array[index];
+      for (let i = 0; i < list.count; i++) {
+        yield list.getItem(i);
       }
     },
     get length() {
-      return array.length;
+      return list.count;
     },
     shift: () => {
-      return array.shift();
+      return list.removeHead();
     }
   };
 }
