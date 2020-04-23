@@ -1,5 +1,4 @@
 import PriorityQueue from "../PriorityQueue";
-import HaffmanTreeDiagram from "../HaffmanTreeDiagram/HaffmanTreeDiagram";
 
 let compare = (left, right) => {
   if (left === right) {
@@ -12,6 +11,69 @@ let compare = (left, right) => {
     return 1;
   }
 };
+
+export default function HaffmanCompression(compareChars) {
+  if (compareChars) setCompareFunction(compareChars);
+
+  let tree = {};
+  return {
+    compress: message => {
+      let alphabet = createTree(createPriorityQueue(message));
+      let sequences = new Map();
+
+      depthFirstTreeTraversal(
+        alphabet,
+        () => {},
+        (sequence, current) => {
+          sequences.set(
+            current.data,
+            sequence.map(el => el.value)
+          );
+        }
+      );
+
+      return {
+        alphabetTree: {
+          ...alphabet,
+          breadthTraversal: breadthFirstTreeTraversal(alphabet)
+        },
+        alphabet: sequences,
+        compressedMessage: compression(message, sequences)
+      };
+    },
+    getTreeRoot: () => {
+      return {
+        data: {},
+        createPath,
+        followPath
+      };
+    },
+    decompress: (alphabetTree, message) => {
+      let decompressedMessage = decompress(message, alphabetTree);
+      let sequences = new Map();
+      console.log(alphabetTree);
+      depthFirstTreeTraversal(
+        alphabetTree,
+        () => {},
+        (sequence, current) => {
+          sequences.set(
+            current.data,
+            sequence.map(el => el.value)
+          );
+        }
+      );
+
+      return {
+        alphabetTree: {
+          ...alphabetTree,
+          breadthTraversal: breadthFirstTreeTraversal(alphabetTree)
+        },
+        alphabet: sequences,
+        decompressedMessage
+      };
+    }
+  };
+}
 
 function setCompareFunction(predicate) {
   compare = predicate;
@@ -57,7 +119,9 @@ function createTree(priorityQueue) {
     };
     tree.addItem(newItem);
   }
-  return tree.toArray()[0];
+  let root = tree.toArray()[0];
+  root.priority = root.data.left.priority + root.data.right.priority;
+  return root;
 }
 
 function depthFirstTreeTraversal(tree, showElement, onLeaf) {
@@ -87,17 +151,15 @@ function depthFirstTreeTraversal(tree, showElement, onLeaf) {
   return result;
 }
 
-function breadthFirstTreeTraversal(tree, showElement, onNewLevel) {
+function breadthFirstTreeTraversal(tree) {
   let root = { ...tree };
-  let current = root;
   let result = [[]];
   let processStack = [root];
   let i = 0;
-  while (processStack.length && i < 100) {
-    result[i] = [];
+  while (processStack.length) {
     processStack = processStack
       .map(element => {
-        showElement && showElement(element);
+        result[i] = [];
         result[i].push(element);
         let arr = [];
         if (element.data.left) {
@@ -109,33 +171,9 @@ function breadthFirstTreeTraversal(tree, showElement, onNewLevel) {
         return arr;
       })
       .flat();
-
     i++;
-    // if (!current.data.left && !current.data.right && !processStack.length) {
-    //   break;
-    //   onLeaf(processStack.slice(1), current);
-    // }
-
-    // showElement(current);
-    // if (
-    //   current.data.left &&
-    //   (!processStack.length || processStack.length === 1)
-    // ) {
-    //   processStack.push(current.data.left);
-    // }
-    // if (
-    //   current.data.right &&
-    //   (!processStack.length || processStack.length === 1)
-    // ) {
-    //   processStack.push(current.data.right);
-    // }
-    // current = processStack.pop();
-
-    // if (!current.data.left && !current.data.right && !processStack.length) {
-    //   break;
-    //   //   onLeaf(processStack.slice(1), current);
-    // }
   }
+  console.log(result);
   return result;
 }
 
@@ -191,58 +229,20 @@ function followPath(start, path) {
   return curr;
 }
 
-export default function HaffmanCompression(compareChars) {
-  if (compareChars) setCompareFunction(compareChars);
+function decompress(message, alphabetTree) {
+  let decodedMessage = [];
+  let found = {};
 
-  let sequences = new Map();
-  let tree = {};
-
-  return {
-    compress: message => {
-      let tree = createTree(createPriorityQueue(message));
-      // console.log(tree);
-      let diag = new HaffmanTreeDiagram();
-      // console.log(diag);
-
-      depthFirstTreeTraversal(
-        tree,
-        current => {
-          console.log(current.priority);
-        },
-        (sequence, current) => {
-          sequences.set(
-            current.data,
-            sequence.map(el => el.value)
-          );
-        }
-      );
-      console.log(tree);
-      diag.drawTree(
-        tree,
-        [...sequences.keys()].length,
-        breadthFirstTreeTraversal(tree).length,
-        "tree1"
-      );
-      return {
-        alphabet: sequences,
-        compressedMessage: compression(message, sequences)
-      };
-    },
-    emptyTree: () => {
-      tree = { priority: "", data: {} };
-    },
-    addToTree: (char, path) => {
-      createPath(tree, char, path);
-    },
-    drawTree: alphabet => {
-      let diag = new HaffmanTreeDiagram();
-      diag.drawTree(
-        tree,
-        Object.keys(alphabet).length,
-        breadthFirstTreeTraversal(tree).length,
-        "tree2"
-      );
-    },
-    followPath: (path, start = tree) => followPath(start, path)
-  };
+  for (let i = 0; i < message.length; i++) {
+    if (Object.keys(found).length) {
+      found = followPath(found, message[i]);
+    } else {
+      found = followPath(alphabetTree, message[i]);
+    }
+    if (!found.data.left && !found.data.right) {
+      decodedMessage.push(found.data);
+      found = {};
+    }
+  }
+  return decodedMessage;
 }

@@ -11,7 +11,7 @@ let line = d3.svg
     return point.ly;
   });
 
-function update(source, alphabetLength, levelsCount, containerId) {
+function update(containerId, source, alphabetLength, levelsCount) {
   const canvasWidth = alphabetLength * 25 + 500;
   const canvasHeight = levelsCount * 20 + 500;
   //Set new height ratio on new renders
@@ -126,7 +126,7 @@ function update(source, alphabetLength, levelsCount, containerId) {
 
 export default function HaffmanTreeDiagram() {
   return {
-    drawTree(root, alphabetLength, levelsCount, containerId) {
+    drawTree(containerId, root, alphabetLength, levelsCount) {
       treeData.push({ label: root.priority });
       let curr = root;
       let currentNode = treeData[0];
@@ -169,7 +169,7 @@ export default function HaffmanTreeDiagram() {
         }
         processStack = processStack.flat();
       }
-      update(treeData[0], alphabetLength, levelsCount, containerId);
+      update(containerId, treeData[0], alphabetLength, levelsCount);
     }
   };
 }

@@ -1,99 +1,95 @@
 import PriorityQueue from "./PriorityQueue";
 import HaffmanCompression from "./HaffmanCompression";
+import HaffmanTreeDiagram from "./HaffmanTreeDiagram";
+import "./index.css";
 
-(async () => {
-  let haffmanCompression = new HaffmanCompression();
-  let mess = await (await fetch("input.txt")).text();
-  console.time();
-  let result = haffmanCompression.compress(mess.split(""));
-  console.timeLog();
+(function bind() {
+  document.getElementById("submit_input").addEventListener("click", event => {
+    let file = document.getElementById("input").files[0];
+    readFile(file, text => {
+      console.log(text);
+      encode(text);
+    });
+  });
 
-  let encodedLength = haffmanText(
-    result.compressedMessage,
-    result.alphabet
-  ).slice("").length;
-  let originallength = unicodeText(mess).slice("").length;
-  console.log(originallength, encodedLength);
-  console.log(((originallength - encodedLength) / originallength) * 100);
-
-  saveAsFile(haffmanText(result.compressedMessage, result.alphabet), "encoded");
-
-  let code = await (await fetch("encoded.txt")).text();
-  haffmanCompression.emptyTree();
-  let treeLength = parseInt(code.slice(0, 32), 2);
-  let maxCharLength = parseInt(code.slice(32, 32 + 6), 2);
-  let maxCodeLength = parseInt(
-    code.slice(32 + 6, 32 + 6 + treeLength.toString(2).length),
-    2
-  );
-  let skip = 32 + 6 + treeLength.toString(2).length;
-  let alphabet = {};
-  let char;
-  let charCode;
-  for (let i = 0; i < treeLength; i++) {
-    char = String.fromCharCode(
-      parseInt(code.slice(skip, skip + maxCharLength), 2)
-    );
-    charCode = code.slice(
-      skip + maxCharLength,
-      skip + maxCharLength + maxCodeLength
-    );
-    haffmanCompression.addToTree(
-      char,
-      parseInt(charCode, 2)
-        .toString(2)
-        .slice(1)
-    );
-    alphabet[char] = parseInt(charCode, 2).toString(2);
-    skip = skip + maxCharLength + maxCodeLength;
-  }
-  haffmanCompression.drawTree(alphabet);
-  let message = code.slice(skip);
-  let decodedMessage = "";
-  let buffer = "";
-  let found = {};
-  // let j = 0;
-  for (let i = 0; i < message.length; i++) {
-    // found = Object.values(alphabet).indexOf(buffer);
-    // if (found !== -1) {
-    //   decodedMessage += Object.keys(alphabet)[found];
-    //   buffer = '';
-    //   continue;
-    // }
-    // buffer += message[i];
-    if (Object.keys(found).length) {
-      found = haffmanCompression.followPath(message[i], found);
-    } else {
-      found = haffmanCompression.followPath(message[i]);
-    }
-    if (typeof found.data === "string") {
-      decodedMessage += found.data;
-      found = {};
-    }
-    // console.log(i);
-    // buffer = message.slice(i, i + maxCharLength);
-    // j = buffer.length - 1;
-    // console.log(j);
-    // for (j; j > 0; j--) {
-    //   console.log(buffer);
-    //   found = Object.values(alphabet).indexOf(buffer);
-    //   if (found !== -1) {
-    //     decodedMessage += Object.keys(alphabet)[found];
-    //     buffer = '';
-    //     break;
-    //   }
-    //   buffer = buffer.slice(0, j + 1);
-    // }
-    // if (j <= 0) {
-    //   console.log(j);
-    //   console.log(decodedMessage);
-    //   throw Error('Unexpected character. Data is damaged');
-    // }
-    // i += j + 2;
-    // j = 0;
-  }
-  saveAsFile(decodedMessage, "output");
+  document.getElementById("submit_encoded").addEventListener("click", event => {
+    let file = document.getElementById("encoded").files[0];
+    readFile(file, text => {
+      console.log(text);
+      decode(text);
+    });
+  });
 })();
+
+function readFile(file, onFileLoad) {
+  var reader = new FileReader();
+  reader.readAsText(file, "UTF-8");
+  reader.onload = function(evt) {
+    onFileLoad(evt.target.result);
+  };
+}
+
+async function encode(message) {
+  let haffmanCompression = new HaffmanCompression(compare);
+  // let message = await (await fetch("input.txt")).text();
+  console.time();
+  let {
+    alphabet,
+    alphabetTree,
+    compressedMessage
+  } = haffmanCompression.compress(message.split(""));
+  console.timeLog();
+  console.log(alphabetTree);
+  drawTree("tree1", alphabet, alphabetTree);
+
+  (function logCompressionPercent() {
+    let encodedLength = haffmanText(compressedMessage, alphabet).slice("")
+      .length;
+    let originallength = unicodeText(message).slice("").length;
+
+    console.log(originallength, encodedLength);
+    console.log(((originallength - encodedLength) / originallength) * 100);
+  })();
+
+  saveAsFile(haffmanText(compressedMessage, alphabet), "encoded");
+}
+
+async function decode(input) {
+  let haffmanCompression = new HaffmanCompression(compare);
+  // let input = await (await fetch("encoded.txt")).text();
+  let { alphabet, message } = parseInput(
+    haffmanCompression.getTreeRoot(),
+    input
+  );
+
+  let {
+    alphabetTree,
+    alphabet: alphabetArray,
+    decompressedMessage
+  } = haffmanCompression.decompress(alphabet, message);
+
+  drawTree("tree2", alphabetArray, alphabetTree);
+  console.log(decompressedMessage);
+  saveAsFile(decompressedMessage.join(""), "output");
+}
+
+function compare(inputText, outputText) {
+  return inputText === outputText;
+}
+
+//
+
+//
+
+//
+
+function drawTree(containerId, alphabet, alphabetTree) {
+  let alphabetLength = [...alphabet.keys()].length;
+  let treeLevelsCount = alphabetTree.breadthTraversal.length;
+  console.log(alphabetLength);
+  let diag = new HaffmanTreeDiagram();
+  diag.drawTree(containerId, alphabetTree, alphabetLength, treeLevelsCount);
+}
 
 function haffmanText(message, alphabet) {
   let maxLength = [];
@@ -153,4 +149,61 @@ function saveAsFile(content, filename) {
     anchor.href
   ].join(":");
   anchor.click();
+}
+
+function parseInput(treeRoot, input) {
+  let alphabetLength = parseInt(input.slice(0, 32), 2);
+  let maxCharLength = parseInt(input.slice(32, 32 + 6), 2);
+  let maxCodeLength = parseInt(
+    input.slice(32 + 6, 32 + 6 + alphabetLength.toString(2).length),
+    2
+  );
+
+  let skip = 32 + 6 + alphabetLength.toString(2).length;
+  let limit = (maxCharLength + maxCodeLength) * alphabetLength;
+
+  let alphabet = createAlphabet(
+    treeRoot,
+    input.slice(skip, skip + limit),
+    alphabetLength,
+    maxCharLength,
+    maxCodeLength
+  );
+
+  let message = input.slice(skip + limit);
+  return { alphabet, message };
+}
+
+function createAlphabet(
+  tree,
+  encodedAlphabet,
+  aphabetLength,
+  maxCharLength,
+  maxCodeLength
+) {
+  let char;
+  let code;
+
+  let skip = 0;
+
+  for (let i = 0; i < aphabetLength; i++) {
+    char = String.fromCharCode(
+      parseInt(encodedAlphabet.slice(skip, skip + maxCharLength), 2)
+    );
+    code = encodedAlphabet.slice(
+      skip + maxCharLength,
+      skip + maxCharLength + maxCodeLength
+    );
+
+    tree.createPath(
+      tree,
+      char,
+      parseInt(code, 2)
+        .toString(2)
+        .slice(1)
+    );
+
+    skip = skip + maxCharLength + maxCodeLength;
+  }
+  return tree;
 }
