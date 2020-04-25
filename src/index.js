@@ -46,6 +46,8 @@ async function encode(message) {
   } = haffmanCompression.compress(message.split(''));
   console.timeEnd('Compression time');
 
+  console.log('Alphabet length: ' + [...alphabet].length);
+
   drawTree('tree1', alphabet, alphabetTree);
   (function logCompressionPercent() {
     let encodedLength = haffmanText(compressedMessage, alphabet).length;

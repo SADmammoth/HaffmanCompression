@@ -12,8 +12,8 @@ let line = d3.svg
   });
 
 function update(containerId, source, alphabetLength, levelsCount) {
-  const canvasWidth = alphabetLength * 25 + 500;
-  const canvasHeight = levelsCount * 20 + 500;
+  const canvasWidth = alphabetLength * 27 + 500;
+  const canvasHeight = levelsCount * 22 + 500;
   //Set new height ratio on new renders
 
   let tree = d3.layout.tree().size([canvasWidth, canvasHeight]);
