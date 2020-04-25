@@ -38,7 +38,7 @@
     "webpack-watch": "webpack --mode=production --watch",
     "lint": "eslint src/",
     "scss": "node-sass src/view/styles/scss -o src/view/styles/css",
-    "start": "babel-node index.js --extensions \".js,.ts\""
+    "start": "node server.js"
   },
   "browserslist": {
     "production": [
