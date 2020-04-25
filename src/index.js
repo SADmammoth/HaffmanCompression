@@ -19,10 +19,10 @@ import './index.css';
     });
   });
 
-  document.getElementById('tree1_scaler').addEventListener('change', event => {
+  document.getElementById('tree1_scaler').addEventListener('input', event => {
     scaleTree('tree1', event.target.value);
   });
-  document.getElementById('tree2_scaler').addEventListener('change', event => {
+  document.getElementById('tree2_scaler').addEventListener('input', event => {
     scaleTree('tree2', event.target.value);
   });
 })();
@@ -44,7 +44,6 @@ async function encode(message) {
     alphabetTree,
     compressedMessage
   } = haffmanCompression.compress(message.split(''));
-  console.timeLog('Compression time');
   console.timeEnd('Compression time');
 
   drawTree('tree1', alphabet, alphabetTree);
@@ -83,7 +82,6 @@ async function decode(input) {
     alphabet: alphabetArray,
     decompressedMessage
   } = haffmanCompression.decompress(alphabet, message);
-  console.timeLog('Decompression time');
   console.timeEnd('Decompression time');
 
   drawTree('tree2', alphabetArray, alphabetTree);
@@ -132,6 +130,7 @@ function drawTree(containerId, alphabet, alphabetTree) {
   let alphabetLength = [...alphabet.keys()].length;
   let treeLevelsCount = alphabetTree.breadthTraversal.length;
   let diag = new HaffmanTreeDiagram();
+  document.getElementById(containerId).classList.add('show');
   document.getElementById(containerId).innerHTML = '';
   document.getElementById(containerId + '_header').style.display = 'block';
   diag.drawTree(containerId, alphabetTree, alphabetLength, treeLevelsCount);

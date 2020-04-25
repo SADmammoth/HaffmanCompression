@@ -4,53 +4,113 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Haffman</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    />
   </head>
   <body>
-    <h1>Haffman compression, decompression and tree visualisation</h1>
-    <div>
-      <label for="input">File to encode</label>
-      <input id="input" type="file" accept=".txt" />
-      <button id="submit_input">Encode</button>
+    <h1 class="container mx-auto text-primary mb-3">
+      Haffman compression, decompression and tree visualisation
+    </h1>
+    <div class="card">
+      <div class="container mx-auto">
+        <form
+          class="input-group"
+          onchange="filename.value = ': ' + input.files.item(0).name"
+        >
+          <label class="custom-file-label" for="input" id="filename">
+            File to encode<em><output id="filename"></output></em>
+          </label>
+          <input
+            class="custom-file-input"
+            id="input"
+            type="file"
+            accept=".txt"
+          />
+        </form>
+        <button id="submit_input" class="btn btn-primary">Encode</button>
+      </div>
+      <div class="container mx-auto">
+        <form
+          class="input-group"
+          onchange="filename.value = ': ' + encoded.files.item(0).name"
+        >
+          <label class="custom-file-label" for="encoded" id="filename">
+            File to decode<em><output id="filename"></output></em>
+          </label>
+          <input
+            class="custom-file-input"
+            id="encoded"
+            type="file"
+            accept=".txt"
+          />
+        </form>
+        <button id="submit_encoded" class="btn btn-primary">Decode</button>
+      </div>
     </div>
-    <div>
-      <label for="encoded">File to decode</label>
-      <input id="encoded" type="file" accept=".txt" />
-      <button id="submit_encoded">Decode</button>
+    <div class="tree-container">
+      <div class="container mx-auto" id="tree1_header" style="display: none;">
+        <h2>Alphabet tree on compression</h2>
+        <p class="text-center text-muted">
+          Additional info in developer console (Ctrl + Shift + J)
+        </p>
+        <form
+          class="scale-form mx-auto"
+          oninput="tree1_scaler_result.value = tree1_scaler.value"
+        >
+          <div class="input-group">
+            <label
+              class="text-muted font-weight-bold"
+              for="tree1_scaler_result"
+            >
+              Tree scale (<output id="tree1_scaler_result">100</output>)
+            </label>
+          </div>
+          <input
+            class="custom-range"
+            id="tree1_scaler"
+            type="range"
+            value="100"
+            min="0"
+            max="100"
+            step="1"
+          />
+        </form>
+      </div>
+      <div class="tree" id="tree1"></div>
     </div>
-    <div id="tree1_header" style="display: none;">
-      <h2>Alphabet tree on compression</h2>
-      <p>Additional info in developer console (Ctrl + Shift + J)</p>
-      <form oninput="tree1_scaler_result.value = tree1_scaler.value">
-        <label for="tree1_scaler_result">Tree scale</label>
-        <output id="tree1_scaler_result">100</output>
-        <input
-          id="tree1_scaler"
-          type="range"
-          value="100"
-          min="0"
-          max="100"
-          step="1"
-        />
-      </form>
+    <div class="tree-container">
+      <div class="container mx-auto" id="tree2_header" style="display: none;">
+        <h2>Alphabet tree on decompression</h2>
+        <p class="text-center text-muted">
+          Additional info in developer console (Ctrl + Shift + J)
+        </p>
+        <form
+          class="scale-form mx-auto"
+          oninput="tree2_scaler_result.value = tree2_scaler.value"
+        >
+          <div class="input-group">
+            <label
+              class="text-muted font-weight-bold"
+              for="tree2_scaler_result"
+            >
+              Tree scale (<output id="tree1_scaler_result">100</output>)
+            </label>
+          </div>
+          <input
+            class="custom-range"
+            id="tree2_scaler"
+            type="range"
+            value="100"
+            min="0"
+            max="100"
+            step="1"
+          />
+        </form>
+      </div>
+      <div class="tree" id="tree2"></div>
     </div>
-    <div class="tree" id="tree1"></div>
-    <div id="tree2_header" style="display: none;">
-      <h2>Alphabet tree on decompression</h2>
-      <p>Additional info in developer console (Ctrl + Shift + J)</p>
-      <form oninput="tree2_scaler_result.value = tree2_scaler.value">
-        <label for="tree2_scaler_result">Tree scale</label>
-        <output id="tree2_scaler_result">100</output>
-        <input
-          id="tree2_scaler"
-          type="range"
-          value="100"
-          min="0"
-          max="100"
-          step="1"
-        />
-      </form>
-    </div>
-    <div class="tree" id="tree2"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
   </body>
 </html>
