@@ -1,4 +1,4 @@
-import PriorityQueue from "../PriorityQueue";
+import PriorityQueue from '../PriorityQueue';
 
 let compare = (left, right) => {
   if (left === right) {
@@ -51,7 +51,7 @@ export default function HaffmanCompression(compareChars) {
     decompress: (alphabetTree, message) => {
       let decompressedMessage = decompress(message, alphabetTree);
       let sequences = new Map();
-      console.log(alphabetTree);
+
       depthFirstTreeTraversal(
         alphabetTree,
         () => {},
@@ -173,35 +173,34 @@ function breadthFirstTreeTraversal(tree) {
       .flat();
     i++;
   }
-  console.log(result);
   return result;
 }
 
 function compression(message, alphabet) {
   return message.map(char => {
-    let u = [...alphabet.keys()].find(candidate => {
+    let key = [...alphabet.keys()].find(candidate => {
       return !compare(candidate, char);
     });
-    return alphabet.get(u);
+    return alphabet.get(key);
   });
 }
 
 function createPath(root, leafValue, path) {
   let curr = root;
   for (let i = 0; i < path.length; i++) {
-    if (path[i] === "0") {
+    if (path[i] === '0') {
       if (curr.data && curr.data.left) {
         curr = curr.data.left;
       } else {
-        curr.data.left = { priority: "", data: {} };
+        curr.data.left = { priority: '', data: {} };
         curr = curr.data.left;
       }
     }
-    if (path[i] === "1") {
+    if (path[i] === '1') {
       if (curr.data && curr.data.right) {
         curr = curr.data.right;
       } else {
-        curr.data.right = { priority: "", data: {} };
+        curr.data.right = { priority: '', data: {} };
         curr = curr.data.right;
       }
     }
@@ -215,14 +214,14 @@ function createPath(root, leafValue, path) {
 function followPath(start, path) {
   let curr = start;
   for (let i = 0; i < path.length; i++) {
-    if (typeof curr.data === "string") {
-      break;
+    if (!curr.data.left && !curr.data.right) {
+      return {};
     }
-    if (path[i] === "0") {
+    if (path[i] === '0') {
       curr = curr.data.left;
     }
 
-    if (path[i] === "1") {
+    if (path[i] === '1') {
       curr = curr.data.right;
     }
   }
@@ -231,17 +230,17 @@ function followPath(start, path) {
 
 function decompress(message, alphabetTree) {
   let decodedMessage = [];
-  let found = {};
+  let found = null;
 
   for (let i = 0; i < message.length; i++) {
-    if (Object.keys(found).length) {
+    if (found) {
       found = followPath(found, message[i]);
     } else {
       found = followPath(alphabetTree, message[i]);
     }
     if (!found.data.left && !found.data.right) {
       decodedMessage.push(found.data);
-      found = {};
+      found = null;
     }
   }
   return decodedMessage;

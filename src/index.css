@@ -27,6 +27,14 @@
   stroke: #ccc;
   stroke-width: 2px;
 }
-.tree {
-  width: 100%;
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  margin-top: 20px;
+}
+
+button {
+  display: block;
+  margin-top: 10px;
 }
