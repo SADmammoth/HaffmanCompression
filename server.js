@@ -12,7 +12,7 @@ app.get('/input.txt', (req, res) => {
 });
 
 app.get('/encoded.txt', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/encoded(1).txt'));
+  res.sendFile(path.join(__dirname, 'public/encoded.txt'));
 });
 
 app.get('*', (req, res) => {

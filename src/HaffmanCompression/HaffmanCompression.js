@@ -15,9 +15,8 @@ let compare = (left, right) => {
 export default function HaffmanCompression(compareChars) {
   if (compareChars) setCompareFunction(compareChars);
 
-  let tree = {};
   return {
-    compress: message => {
+    compress: (message) => {
       let alphabet = createTree(createPriorityQueue(message));
       let sequences = new Map();
 
@@ -27,7 +26,7 @@ export default function HaffmanCompression(compareChars) {
         (sequence, current) => {
           sequences.set(
             current.data,
-            sequence.map(el => el.value)
+            sequence.map((el) => el.value)
           );
         }
       );
@@ -35,17 +34,17 @@ export default function HaffmanCompression(compareChars) {
       return {
         alphabetTree: {
           ...alphabet,
-          breadthTraversal: breadthFirstTreeTraversal(alphabet)
+          breadthTraversal: breadthFirstTreeTraversal(alphabet),
         },
         alphabet: sequences,
-        compressedMessage: compression(message, sequences)
+        compressedMessage: compression(message, sequences),
       };
     },
     getTreeRoot: () => {
       return {
         data: {},
         createPath,
-        followPath
+        followPath,
       };
     },
     decompress: (alphabetTree, message) => {
@@ -58,7 +57,7 @@ export default function HaffmanCompression(compareChars) {
         (sequence, current) => {
           sequences.set(
             current.data,
-            sequence.map(el => el.value)
+            sequence.map((el) => el.value)
           );
         }
       );
@@ -66,12 +65,12 @@ export default function HaffmanCompression(compareChars) {
       return {
         alphabetTree: {
           ...alphabetTree,
-          breadthTraversal: breadthFirstTreeTraversal(alphabetTree)
+          breadthTraversal: breadthFirstTreeTraversal(alphabetTree),
         },
         alphabet: sequences,
-        decompressedMessage
+        decompressedMessage,
       };
-    }
+    },
   };
 }
 
@@ -81,7 +80,7 @@ function setCompareFunction(predicate) {
 
 function createPriorityQueue(message) {
   let counts = {};
-  message.forEach(char => {
+  message.forEach((char) => {
     if (!counts[char]) {
       counts[char] = 1;
     } else {
@@ -114,8 +113,8 @@ function createTree(priorityQueue) {
       priority: left.priority + right.priority,
       data: {
         left,
-        right
-      }
+        right,
+      },
     };
     tree.addItem(newItem);
   }
@@ -158,7 +157,7 @@ function breadthFirstTreeTraversal(tree) {
   let i = 0;
   while (processStack.length) {
     processStack = processStack
-      .map(element => {
+      .map((element) => {
         result[i] = [];
         result[i].push(element);
         let arr = [];
@@ -177,8 +176,8 @@ function breadthFirstTreeTraversal(tree) {
 }
 
 function compression(message, alphabet) {
-  return message.map(char => {
-    let key = [...alphabet.keys()].find(candidate => {
+  return message.map((char) => {
+    let key = [...alphabet.keys()].find((candidate) => {
       return !compare(candidate, char);
     });
     return alphabet.get(key);
